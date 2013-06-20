@@ -54,7 +54,7 @@ apt-get install tor
 
 echo "Configuring Tor..."
 /etc/tor/torrc <<'onion_pi_configuration'
-# v0.1
+# v0.2
 Log notice file /var/log/tor/notices.log
 VirtualAddrNetwork 10.192.0.0/10
 AutomapHostsSuffixes .onion,.exit
@@ -63,6 +63,9 @@ TransPort 9040
 TransListenAddress 192.168.42.1
 DNSPort 53
 DNSListenAddress 192.168.42.1
+SocksPort 9050
+ClientOnly 1
+Exitpolicy reject *:*
 
 onion_pi_configuration
 
@@ -88,7 +91,7 @@ echo "Setup complete!
 To connect to your own node set your web browser to connect to:
   Proxy type: SOCKSv5
   IP: $(hostname -i)
-  Port: 9040
+  Port: 9050
 
 Verify by visiting: https://check.torproject.org/
 "
