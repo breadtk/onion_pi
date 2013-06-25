@@ -74,7 +74,7 @@ iptables -F
 iptables -t nat -F
 iptables -t nat -A PREROUTING -i wlan0 -p udp --dport 53 -j REDIRECT --to-ports 53
 iptables -t nat -A PREROUTING -i wlan0 -p tcp --syn -j REDIRECT --to-ports 9040
-h -c "iptables-save > /etc/iptables.ipv4.nat"
+sh -c "iptables-save > /etc/iptables.ipv4.nat"
 
 echo "Setting up logging in /var/log/tor/notices.log ..."
 touch /var/log/tor/notices.log
