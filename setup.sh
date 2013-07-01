@@ -90,7 +90,7 @@ service tor start
 echo "Setup complete!
 To connect to your own node set your web browser to connect to:
   Proxy type: SOCKSv5
-  IP: $(hostname -i)
+  IP: $(hostname -i | awk '{print $2}')
   Port: 9050
 
 Verify by visiting: https://check.torproject.org/
