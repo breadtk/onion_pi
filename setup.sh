@@ -1,11 +1,9 @@
 #!/bin/bash
 # Based on Adafruit Learning Technologies Onion Pi project
 # More info: http://learn.adafruit.com/onion-pi
-# 
 #
 # To do:
 # * Code, code, and code!
-# * Welcome banner
 # * Options for setting up relay, exit, or bridge
 # * Anonymization of Onion Pi box
 # * Further testing
@@ -93,7 +91,7 @@ To connect to your own node set your web browser to connect to:
   IP: $(hostname -i | awk '{print $1}')
   Port: 9050
 
-Verify by visiting: https://check.torproject.org/
+Verify installation by visiting: https://check.torproject.org/
 "
 
-exit 0
+exit
