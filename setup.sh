@@ -43,7 +43,7 @@ Onion_Pi
 
 echo "This script will auto-setup a Tor proxy for you. It is recommend that you
 run this script on a fresh installation of Raspbian."
-read -p "Press [Enter] key to begin..."
+read -p "Press [Enter] key to begin.."
 
 echo "Updating package index.."
 apt-get update -y
@@ -54,7 +54,7 @@ apt-get upgrade -y
 echo "Downloading and installing various packages.."
 apt-get install -y tor chkrootkit unattended-upgrades ntp shred monit
 
-echo "Configuring Tor..."
+echo "Configuring Tor.."
 cat /dev/null > /etc/tor/torrc
 /etc/tor/torrc <<'onion_pi_configuration'
 # v0.2
@@ -72,14 +72,14 @@ Exitpolicy reject *:*
 
 onion_pi_configuration
 
-echo "Fixing firewall configuration..."
+echo "Fixing firewall configuration.."
 iptables -F
 iptables -t nat -F
 iptables -t nat -A PREROUTING -i wlan0 -p udp --dport 53 -j REDIRECT --to-ports 53
 iptables -t nat -A PREROUTING -i wlan0 -p tcp --syn -j REDIRECT --to-ports 9040
 sh -c "iptables-save > /etc/iptables.ipv4.nat"
 
-echo "Wiping various  files and directories..."
+echo "Wiping various  files and directories.."
 shred -fvzu -n 3 /var/log/wtmp
 shred -fvzu -n 3 /var/log/lastlog
 shred -fvzu -n 3 /var/run/utmp
@@ -108,7 +108,11 @@ if failed port 9050 type tcp
 if 3 restarts within 5 cycles then timeout
 tor_monit
 
-echo "Starting tor..."
+echo "Starting monit.."
+monit quit
+monit -c /etc/monit/monitrc
+
+echo "Starting tor.."
 service tor start
 
 echo "Setup complete!
