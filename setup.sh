@@ -52,7 +52,7 @@ echo "Updating out-of-date packages.."
 apt-get upgrade -y
 
 echo "Downloading and installing various packages.."
-apt-get install -y tor chkrootkit unattended-upgrades ntp shred
+apt-get install -y tor chkrootkit unattended-upgrades ntp shred monit
 
 echo "Configuring Tor..."
 cat /dev/null > /etc/tor/torrc
@@ -88,13 +88,25 @@ shred -fvzu -n 3 /var/log/syslog*
 shred -fvzu -n 3 /var/log/messages*
 shred -fvzu -n 3 /var/log/auth.log*
 
-echo "Setting up logging in /var/log/tor/notices.log ..."
+echo "Setting up logging in /var/log/tor/notices.log.."
 touch /var/log/tor/notices.log
 chown debian-tor /var/log/tor/notices.log
 chmod 644 /var/log/tor/notices.log
 
-echo "Setting tor to start at boot..."
+echo "Setting tor to start at boot.."
 update-rc.d tor enable
+
+echo "Setting up Monit to watch Tor process.."
+/etc/monit/monitrc << 'tor_monit'
+check process tor with pidfile /var/run/tor/tor.pid
+group tor
+start program = "/etc/init.d/tor start"
+stop program = "/etc/init.d/tor stop"
+if failed port 9050 type tcp
+   with timeout 5 seconds
+   then restart
+if 3 restarts within 5 cycles then timeout
+tor_monit
 
 echo "Starting tor..."
 service tor start
