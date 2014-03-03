@@ -51,6 +51,9 @@ read -p "Press [Enter] key to begin.."
 /bin/echo "Updating out-of-date packages.."
 /usr/bin/apt-get upgrade -y
 
+/bin/echo "Removing Wolfram Alpha Enginer due to bug. More info:
+http://www.raspberrypi.org/phpBB3/viewtopic.php?f=66&t=68263"
+/usr/bin/apt-get remove wolfram-engine
 /bin/echo "Downloading and installing various packages.."
 /usr/bin/apt-get install -y tor chkrootkit unattended-upgrades ntp monit
 
@@ -110,8 +113,8 @@ if 3 restarts within 5 cycles then timeout
 tor_monit
 
 /bin/echo "Starting monit.."
-/usrb/bin/monit quit
-/usrb/bin/monit -c /etc/monit/monitrc
+/usr/bin/monit quit
+/usr/bin/monit -c /etc/monit/monitrc
 
 /bin/echo "Starting tor.."
 /usr/sbin/service tor start
