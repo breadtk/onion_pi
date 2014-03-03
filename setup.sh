@@ -1,15 +1,14 @@
 #!/bin/bash
-# Based on Adafruit Learning Technologies Onion Pi project.
+# Onion Pi, based on the Adafruit Learning Technologies Onion Pi project.
 # For more info: http://learn.adafruit.com/onion-pi
 #
 # To do:
-# * Code, code, and code!
 # * Options for setting up relay, exit, or bridge
 # * More anonymization of Onion Pi box
 # * Further testing
 
 if (( $EUID != 0 )); then
-  /bin/echo "This must be run as root. Type in 'sudo $0' to run it as root."
+  /bin/echo "This script must be run as root. Type in 'sudo $0' to run it as root."
   exit 1
 fi
 
@@ -48,39 +47,50 @@ read -p "Press [Enter] key to begin.."
 /bin/echo "Updating package index.."
 /usr/bin/apt-get update -y
 
+/bin/echo "Removing Wolfram Alpha Enginer due to bug. More info:
+http://www.raspberrypi.org/phpBB3/viewtopic.php?f=66&t=68263"
+/usr/bin/apt-get remove -y wolfram-engine
+
 /bin/echo "Updating out-of-date packages.."
 /usr/bin/apt-get upgrade -y
 
-/bin/echo "Removing Wolfram Alpha Enginer due to bug. More info:
-http://www.raspberrypi.org/phpBB3/viewtopic.php?f=66&t=68263"
-/usr/bin/apt-get remove wolfram-engine
 /bin/echo "Downloading and installing various packages.."
-/usr/bin/apt-get install -y tor chkrootkit unattended-upgrades ntp monit
+/usr/bin/apt-get install -y ntp unattended-upgrades monit tor 
 
 /bin/echo "Configuring Tor.."
 /bin/cat /dev/null > /etc/tor/torrc
 /etc/tor/torrc <<'onion_pi_configuration'
-# Onion Pi Config v0.2
-# More information: https://github.com/breadtk/onion_pi/
+## Onion Pi Config v0.3
+## More information: https://github.com/breadtk/onion_pi/
+
+# Transparent proxy port
+TransPort 9040
+# Explicit SOCKS port for applications.
+SocksPort 9050
+
+# Port that Tor will output 'info' level logs to.
 Log notice file /var/log/tor/notices.log
-VirtualAddrNetwork 10.192.0.0/10
+
+# Have Tor run in the background
+RunAsDaemon 1
+
+# Only ever run as a client. Do not run as a relay or an exit.
+ClientOnly
+
+# Ensure resolution of .onion and .exit domains happen through Tor.
 AutomapHostsSuffixes .onion,.exit
 AutomapHostsOnResolve 1
-TransPort 9040
-TransListenAddress 192.168.42.1
-DNSPort 53
-DNSListenAddress 192.168.42.1
-SocksPort 9050
-ClientOnly 1
-Exitpolicy reject *:*
 
+# Serve DNS responses
+DNSPort 53
 onion_pi_configuration
 
 /bin/echo "Fixing firewall configuration.."
 /sbin/iptables -F
 /sbin/iptables -t nat -F
-/sbin/iptables -t nat -A PREROUTING -i wlan0 -p udp --dport 53 -j REDIRECT --to-ports 53
-/sbin/iptables -t nat -A PREROUTING -i wlan0 -p tcp --syn -j REDIRECT --to-ports 9040
+/sbin/iptables -t nat -A PREROUTING -i wlan0 -p udp --dport 53 -j REDIRECT --to-ports 53 -m comment --comment "OnionPi: Redirect all DNS requests to Tor's DNSPort port."
+/sbin/iptables -t nat -A PREROUTING -i wlan0 -p tcp --syn -j REDIRECT --to-ports 9040 -m comment --comment "OnionPi: Redirect all TCP packets to Tor's TransPort port."
+
 /bin/sh -c "/sbin/iptables-save > /etc/iptables.ipv4.nat"
 
 /bin/echo "Wiping various  files and directories.."
@@ -119,13 +129,20 @@ tor_monit
 /bin/echo "Starting tor.."
 /usr/sbin/service tor start
 
-/bin/echo "Setup complete!
-To connect to your own node set your web browser to connect to:
+/usr/bin/clear
+/bin/echo "Onion Pi setup complete!
+To connect to your own Tor gateway, set your web browser or computer to connect to:
   Proxy type: SOCKSv5
-  IP: $(hostname -i | awk '{print $1}')
   Port: 9050
 
-Verify your installation by visiting: https://check.torproject.org/
+  Transparent proxy port: 9040
+
+Before doing anything, verify that you are using the Tor network by visiting:
+
+  https://check.torproject.org/
+
+
+Onion Pi
 "
 
 exit
